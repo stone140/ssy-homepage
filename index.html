@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>石胜元 · 个人主页 (v2.7 · 像素山水 + 自由漫游的动物 + 我的分身 + 留言板)</title>
+  <meta name="description" content="石胜元的个人主页 —— 一个来自甘肃、充满好奇与幽默的大一新生。" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- 明暗模式: 提前恢复上次选择, 避免刷新时闪一下亮色 -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("page-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body id="top">
+
+  <!-- ========== v2.1 起 / v2.7: 像素贴图库 (各页面共用的像素动物 / 植物) ==========
+       做法: 所有小动物只在 <defs> 里画一次, 各页面用 <use href="#px-..."> 取用。
+       好处: 改一处即全局生效, 不会出现五份各自维护的重复贴图。
+       v2.7: 每个页面贴图改成「各自一个 <svg class="pet">」, 用 CSS 百分比散落在页面四周,
+             不再挤在右下角; 每只都能被鼠标碰到后随机跑动 / 飞出屏幕(见 js/main.js)。 -->
+  <svg class="px-sprite px-art" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
+    <defs>
+      <!-- 松树 (取自 V1 岸边松树) -->
+      <symbol id="px-pine" viewBox="0 0 20 25">
+        <g fill="#1f4f34">
+          <rect x="8" y="8" width="4" height="16"/>
+          <rect x="0" y="14" width="20" height="5"/>
+          <rect x="3" y="7" width="14" height="5"/>
+          <rect x="6" y="0" width="8" height="5"/>
+        </g>
+      </symbol>
+      <!-- 松树下的蘑菇 / 小花 -->
+      <symbol id="px-mushroom" viewBox="0 0 12 10">
+        <rect x="4" y="5" width="4" height="5" fill="#f0e6d0"/>
+        <rect x="0" y="0" width="12" height="5" fill="#e05858"/>
+        <rect x="3" y="2" width="2" height="2" fill="#ffffff"/>
+        <rect x="8" y="2" width="2" height="2" fill="#ffffff"/>
+      </symbol>
+      <symbol id="px-flower" viewBox="0 0 3 3">
+        <rect x="0" y="0" width="3" height="3" fill="#ffd94a"/>
+      </symbol>
+      <!-- 云 -->
+      <symbol id="px-cloud" viewBox="0 0 36 14">
+        <g fill="#ffffff">
+          <rect x="0" y="6" width="28" height="8"/>
+          <rect x="8" y="0" width="16" height="8"/>
+        </g>
+      </symbol>
+
+      <!-- 岸边 / 林间小动物 (取自 V1 首屏像素稿) -->
+      <symbol id="px-squirrel" viewBox="0 0 12 16">
+        <rect x="8" y="1" width="3" height="9" fill="#b9793f"/>
+        <rect x="9" y="0" width="3" height="2" fill="#c98a4b"/>
+        <rect x="2" y="8" width="7" height="7" fill="#b9793f"/>
+        <rect x="3" y="10" width="4" height="4" fill="#e8c9a0"/>
+        <rect x="1" y="3" width="6" height="6" fill="#b9793f"/>
+        <rect x="1" y="2" width="2" height="2" fill="#b9793f"/>
+        <rect x="3" y="5" width="1" height="1" fill="#22342b"/>
+      </symbol>
+      <symbol id="px-hare" viewBox="0 0 14 17">
+        <rect x="3" y="0" width="2" height="5" fill="#f6f6f6"/>
+        <rect x="8" y="0" width="2" height="5" fill="#f6f6f6"/>
+        <rect x="3" y="1" width="1" height="4" fill="#f4b8c8"/>
+        <rect x="8" y="1" width="1" height="4" fill="#f4b8c8"/>
+        <rect x="2" y="5" width="9" height="6" fill="#f6f6f6"/>
+        <rect x="4" y="7" width="1" height="1" fill="#22342b"/>
+        <rect x="8" y="7" width="1" height="1" fill="#22342b"/>
+        <rect x="6" y="9" width="1" height="1" fill="#f4b8c8"/>
+        <rect x="1" y="11" width="11" height="5" fill="#f6f6f6"/>
+        <rect x="11" y="11" width="3" height="3" fill="#ffffff"/>
+      </symbol>
+      <symbol id="px-hedgehog" viewBox="0 0 13 10">
+        <rect x="1" y="4" width="10" height="5" fill="#a97b4b"/>
+        <rect x="1" y="2" width="2" height="2" fill="#7a5230"/>
+        <rect x="3" y="1" width="2" height="2" fill="#7a5230"/>
+        <rect x="5" y="0" width="2" height="2" fill="#7a5230"/>
+        <rect x="7" y="1" width="2" height="2" fill="#7a5230"/>
+        <rect x="9" y="5" width="4" height="4" fill="#e8c9a0"/>
+        <rect x="12" y="7" width="2" height="2" fill="#22342b"/>
+        <rect x="10" y="6" width="1" height="1" fill="#22342b"/>
+      </symbol>
+      <symbol id="px-fox" viewBox="0 0 14 10">
+        <rect x="0" y="3" width="3" height="5" fill="#ef8f4b"/>
+        <rect x="0" y="2" width="2" height="2" fill="#ffffff"/>
+        <rect x="2" y="4" width="9" height="5" fill="#ef8f4b"/>
+        <rect x="6" y="4" width="7" height="5" fill="#ef8f4b"/>
+        <rect x="7" y="0" width="2" height="4" fill="#ef8f4b"/>
+        <rect x="11" y="0" width="2" height="4" fill="#ef8f4b"/>
+        <rect x="8" y="5" width="1" height="1" fill="#22342b"/>
+        <rect x="12" y="7" width="2" height="2" fill="#22342b"/>
+      </symbol>
+      <symbol id="px-deer" viewBox="0 0 15 19">
+        <rect x="2" y="14" width="2" height="4" fill="#8a5a2b"/>
+        <rect x="5" y="14" width="2" height="4" fill="#8a5a2b"/>
+        <rect x="9" y="14" width="2" height="4" fill="#8a5a2b"/>
+        <rect x="12" y="14" width="2" height="4" fill="#8a5a2b"/>
+        <rect x="2" y="10" width="12" height="5" fill="#a5713f"/>
+        <rect x="9" y="5" width="4" height="6" fill="#a5713f"/>
+        <rect x="9" y="3" width="5" height="3" fill="#a5713f"/>
+        <rect x="9" y="0" width="1" height="3" fill="#e8c9a0"/>
+        <rect x="13" y="0" width="1" height="3" fill="#e8c9a0"/>
+        <rect x="11" y="4" width="1" height="1" fill="#22342b"/>
+        <rect x="1" y="9" width="2" height="2" fill="#a5713f"/>
+      </symbol>
+      <symbol id="px-cat" viewBox="0 0 15 17">
+        <rect x="12" y="7" width="2" height="7" fill="#d98a4a"/>
+        <rect x="2" y="8" width="9" height="7" fill="#f0a35e"/>
+        <rect x="4" y="11" width="5" height="4" fill="#ffe0c0"/>
+        <rect x="2" y="2" width="9" height="7" fill="#f0a35e"/>
+        <rect x="2" y="0" width="2" height="3" fill="#f0a35e"/>
+        <rect x="9" y="0" width="2" height="3" fill="#f0a35e"/>
+        <rect x="3" y="1" width="1" height="2" fill="#f4b8c8"/>
+        <rect x="9" y="1" width="1" height="2" fill="#f4b8c8"/>
+        <rect x="4" y="5" width="1" height="1" fill="#22342b"/>
+        <rect x="8" y="5" width="1" height="1" fill="#22342b"/>
+        <rect x="6" y="7" width="1" height="1" fill="#f4b8c8"/>
+        <rect x="3" y="14" width="3" height="2" fill="#e09050"/>
+        <rect x="8" y="14" width="3" height="2" fill="#e09050"/>
+      </symbol>
+      <symbol id="px-duck" viewBox="0 0 15 8">
+        <rect x="1" y="4" width="9" height="4" fill="#f5d34e"/>
+        <rect x="3" y="5" width="4" height="2" fill="#e8c020"/>
+        <rect x="8" y="1" width="4" height="4" fill="#f5d34e"/>
+        <rect x="12" y="3" width="2" height="2" fill="#f0a35e"/>
+        <rect x="9" y="2" width="1" height="1" fill="#22342b"/>
+      </symbol>
+      <symbol id="px-frog" viewBox="0 0 11 9">
+        <rect x="1" y="3" width="8" height="5" fill="#6fbf5a"/>
+        <rect x="1" y="1" width="2" height="2" fill="#6fbf5a"/>
+        <rect x="6" y="1" width="2" height="2" fill="#6fbf5a"/>
+        <rect x="2" y="2" width="1" height="1" fill="#22342b"/>
+        <rect x="7" y="2" width="1" height="1" fill="#22342b"/>
+        <rect x="3" y="6" width="4" height="1" fill="#2f7d4f"/>
+        <rect x="0" y="6" width="2" height="2" fill="#5aa848"/>
+        <rect x="8" y="6" width="2" height="2" fill="#5aa848"/>
+      </symbol>
+      <symbol id="px-turtle" viewBox="0 0 13 9">
+        <rect x="2" y="1" width="8" height="5" fill="#2f7d4f"/>
+        <rect x="4" y="2" width="1" height="1" fill="#1f5c38"/>
+        <rect x="6" y="2" width="1" height="1" fill="#1f5c38"/>
+        <rect x="2" y="3" width="1" height="1" fill="#1f5c38"/>
+        <rect x="10" y="3" width="2" height="2" fill="#6fae8c"/>
+        <rect x="11" y="3" width="1" height="1" fill="#22342b"/>
+        <rect x="2" y="6" width="2" height="2" fill="#2f7d4f"/>
+        <rect x="8" y="6" width="2" height="2" fill="#2f7d4f"/>
+      </symbol>
+      <symbol id="px-fish" viewBox="0 0 8 6">
+        <rect x="2" y="1" width="6" height="3" fill="#f0a35e"/>
+        <rect x="0" y="0" width="2" height="5" fill="#ef8f4b"/>
+        <rect x="4" y="0" width="2" height="1" fill="#ef8f4b"/>
+        <rect x="6" y="2" width="1" height="1" fill="#22342b"/>
+      </symbol>
+      <symbol id="px-bird" viewBox="0 0 10 3">
+        <rect x="0" y="0" width="4" height="2" fill="#3e7d5d"/>
+        <rect x="6" y="0" width="4" height="2" fill="#3e7d5d"/>
+        <rect x="3" y="1" width="4" height="2" fill="#2f6f4a"/>
+      </symbol>
+      <symbol id="px-butterfly" viewBox="0 0 10 8">
+        <rect x="4" y="2" width="2" height="5" fill="#22342b"/>
+        <rect x="0" y="1" width="4" height="3" fill="#b06ad0"/>
+        <rect x="6" y="1" width="4" height="3" fill="#b06ad0"/>
+        <rect x="1" y="2" width="1" height="1" fill="#f4ffd9"/>
+        <rect x="8" y="2" width="1" height="1" fill="#f4ffd9"/>
+        <rect x="0" y="4" width="4" height="3" fill="#f0a35e"/>
+        <rect x="6" y="4" width="4" height="3" fill="#f0a35e"/>
+        <rect x="3" y="0" width="1" height="2" fill="#22342b"/>
+        <rect x="6" y="0" width="1" height="2" fill="#22342b"/>
+      </symbol>
+      <symbol id="px-butterfly2" viewBox="0 0 10 8">
+        <rect x="4" y="2" width="2" height="5" fill="#22342b"/>
+        <rect x="0" y="1" width="4" height="3" fill="#7ad0e0"/>
+        <rect x="6" y="1" width="4" height="3" fill="#7ad0e0"/>
+        <rect x="0" y="4" width="4" height="3" fill="#ffd94a"/>
+        <rect x="6" y="4" width="4" height="3" fill="#ffd94a"/>
+        <rect x="3" y="0" width="1" height="2" fill="#22342b"/>
+        <rect x="6" y="0" width="1" height="2" fill="#22342b"/>
+      </symbol>
+
+      <!-- v2.1 新画的两只: 猫头鹰(夜里也醒着) / 送信的鸟 -->
+      <symbol id="px-owl" viewBox="0 0 15 14">
+        <rect x="2" y="0" width="2" height="2" fill="#8a5a2b"/>
+        <rect x="11" y="0" width="2" height="2" fill="#8a5a2b"/>
+        <rect x="2" y="1" width="11" height="12" fill="#a5713f"/>
+        <rect x="1" y="4" width="1" height="7" fill="#8a5a2b"/>
+        <rect x="13" y="4" width="1" height="7" fill="#8a5a2b"/>
+        <rect x="4" y="3" width="3" height="3" fill="#e8c9a0"/>
+        <rect x="8" y="3" width="3" height="3" fill="#e8c9a0"/>
+        <rect x="5" y="4" width="1" height="1" fill="#22342b"/>
+        <rect x="9" y="4" width="1" height="1" fill="#22342b"/>
+        <rect x="7" y="6" width="2" height="1" fill="#f0a35e"/>
+        <rect x="4" y="8" width="7" height="5" fill="#d8b48a"/>
+        <rect x="3" y="13" width="2" height="1" fill="#e8c9a0"/>
+        <rect x="9" y="13" width="2" height="1" fill="#e8c9a0"/>
+      </symbol>
+      <symbol id="px-mailbird" viewBox="0 0 21 9">
+        <rect x="0" y="0" width="4" height="2" fill="#3e7d5d"/>
+        <rect x="6" y="0" width="4" height="2" fill="#3e7d5d"/>
+        <rect x="3" y="1" width="4" height="2" fill="#2f6f4a"/>
+        <rect x="10" y="2" width="9" height="6" fill="#f6f6f6"/>
+        <rect x="11" y="3" width="7" height="1" fill="#cfd8dc"/>
+        <rect x="13" y="5" width="3" height="2" fill="#f4b8c8"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ========== 顶部导航 / 页面选择 ========== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#top"><span class="brand-mark">石</span><span class="brand-text">石胜元</span>      <span class="version-tag">v2.7</span></a>
+      <nav class="site-nav" id="siteNav">
+        <ul>
+          <li><a href="#page-intro" data-page="intro">个人介绍</a></li>
+          <li><a href="#page-major" data-page="major">个人专业</a></li>
+          <li><a href="#page-hobbies" data-page="hobbies">个人兴趣</a></li>
+          <li><a href="#page-contact" data-page="contact">联系我</a></li>
+          <li><a href="#page-board" data-page="board">留言板</a></li>
+        </ul>
+        <button id="langToggle" class="lang-toggle" type="button" aria-label="切换语言">
+          <span class="lang-zh">中</span><span class="lang-sep">/</span><span class="lang-en">EN</span>
+        </button>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="切换到黑夜模式" title="切换到黑夜模式" aria-pressed="false">
+          <span class="theme-icon" aria-hidden="true">🌙</span>
+        </button>
+      </nav>
+      <button id="navBurger" class="nav-burger" type="button" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========== 右上角: 最爱音乐 · 像素碟片播放器 ========== -->
+  <button class="disc-card" id="discCard" type="button" aria-label="播放最爱音乐" aria-pressed="false">
+    <span class="disc-outer" aria-hidden="true">
+      <span class="disc"></span>
+    </span>
+    <span class="disc-info">
+      <span class="disc-title" id="discTitle">最爱音乐</span>
+      <span class="disc-track" id="discTrack">Christina Kuong · Forest Mixtape</span>
+    </span>
+    <span class="disc-state" id="discState" aria-hidden="true">▶</span>
+  </button>
+
+  <!-- 背景音乐 (本地文件, 循环播放) -->
+  <audio id="bgm" src="assets/audio/forest-mixtape.mp3" loop preload="auto"></audio>
+
+  <!-- ========== 顶部背景画面: 像素山水 + 可爱动物 ========== -->
+  <section class="hero" id="hero">
+    <div class="hero-bg" aria-hidden="true">
+      <svg class="pixel-scene" viewBox="0 0 480 270" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges">
+        <defs>
+          <!-- 水面裁剪框: 让流动的高光只在湖水里跑, 不会溢到岸上 -->
+          <clipPath id="waterClip"><rect x="0" y="160" width="480" height="110"/></clipPath>
+
+          <!-- v2.7: 水面反光已按要求取消 —— 原来的 reflFade / reflMask 一并删除,
+               湖水只保留「由左向右流动」的水纹(下面 waveTileSlow / waveTileFast)。 -->
+
+          <!-- 流动图案(慢层): V1 原有的水波纹 + 补齐的几条, 周期正好 480 -->
+          <g id="waveTileSlow" fill="#4a78e0">
+            <rect x="40" y="182" width="26" height="3"/>
+            <rect x="118" y="198" width="30" height="3"/>
+            <rect x="210" y="178" width="26" height="3"/>
+            <rect x="300" y="200" width="34" height="3"/>
+            <rect x="392" y="184" width="24" height="3"/>
+            <rect x="150" y="214" width="28" height="3"/>
+            <rect x="262" y="220" width="30" height="3"/>
+            <rect x="14" y="240" width="46" height="3"/>
+            <rect x="96" y="252" width="38" height="3"/>
+            <rect x="196" y="246" width="52" height="3"/>
+            <rect x="330" y="236" width="42" height="3"/>
+            <rect x="428" y="258" width="40" height="3"/>
+            <rect x="252" y="262" width="34" height="3"/>
+          </g>
+          <!-- 流动图案(快层): 短波光 + V1 的荧光魔法点, 与慢层错速形成层次 -->
+          <g id="waveTileFast">
+            <g fill="#4a78e0">
+              <rect x="30" y="170" width="18" height="2"/>
+              <rect x="120" y="190" width="22" height="2"/>
+              <rect x="210" y="172" width="16" height="2"/>
+              <rect x="300" y="188" width="20" height="2"/>
+              <rect x="390" y="178" width="18" height="2"/>
+              <rect x="450" y="192" width="14" height="2"/>
+              <rect x="72" y="204" width="24" height="2"/>
+              <rect x="256" y="208" width="20" height="2"/>
+              <rect x="348" y="212" width="26" height="2"/>
+              <rect x="168" y="228" width="18" height="2"/>
+              <rect x="418" y="226" width="22" height="2"/>
+            </g>
+            <g fill="#9dff9d">
+              <rect x="136" y="176" width="3" height="3"/>
+              <rect x="236" y="206" width="3" height="3"/>
+              <rect x="330" y="180" width="3" height="3"/>
+              <rect x="196" y="222" width="2" height="2"/>
+              <rect x="368" y="212" width="2" height="2"/>
+            </g>
+          </g>
+        </defs>
+
+        <!-- 天空色带 -->
+        <rect x="0" y="0" width="480" height="96" fill="#d9eef0"/>
+        <rect x="0" y="96" width="480" height="46" fill="#cbe9dc"/>
+        <!-- 太阳 (仅明亮模式显示) -->
+        <g fill="#f6ffd9">
+          <rect x="402" y="24" width="18" height="18"/>
+          <rect x="398" y="28" width="26" height="10"/>
+          <rect x="406" y="20" width="10" height="26"/>
+        </g>
+        <!-- 月亮 & 星星 (仅黑夜模式显示, 香蕉黄) -->
+        <g class="night-sky" fill="#ffe135">
+          <g class="moon" transform="translate(392,22)">
+            <rect x="6" y="0" width="12" height="3"/>
+            <rect x="3" y="3" width="9" height="3"/>
+            <rect x="3" y="6" width="6" height="3"/>
+            <rect x="3" y="9" width="6" height="3"/>
+            <rect x="3" y="12" width="9" height="3"/>
+            <rect x="6" y="15" width="12" height="3"/>
+          </g>
+          <g class="stars">
+            <rect x="46" y="30" width="3" height="3"/>
+            <rect x="58" y="48" width="2" height="2"/>
+            <rect x="88" y="26" width="2" height="2"/>
+            <rect x="118" y="34" width="3" height="3"/>
+            <rect x="150" y="58" width="2" height="2"/>
+            <rect x="176" y="30" width="2" height="2"/>
+            <rect x="206" y="68" width="2" height="2"/>
+            <rect x="232" y="36" width="3" height="3"/>
+            <rect x="262" y="52" width="2" height="2"/>
+            <rect x="286" y="28" width="2" height="2"/>
+            <rect x="312" y="42" width="3" height="3"/>
+            <rect x="338" y="64" width="2" height="2"/>
+            <rect x="356" y="34" width="2" height="2"/>
+            <rect x="372" y="76" width="2" height="2"/>
+            <rect x="72" y="72" width="2" height="2"/>
+            <rect x="140" y="84" width="2" height="2"/>
+            <rect x="196" y="48" width="2" height="2"/>
+            <rect x="300" y="80" width="2" height="2"/>
+            <rect x="250" y="84" width="2" height="2"/>
+            <rect x="428" y="68" width="2" height="2"/>
+            <rect x="436" y="32" width="3" height="3"/>
+            <rect x="412" y="80" width="2" height="2"/>
+          </g>
+        </g>
+        <!-- 云 -->
+        <g fill="#ffffff" opacity="0.9">
+          <rect x="58" y="30" width="28" height="8"/>
+          <rect x="66" y="24" width="16" height="8"/>
+          <rect x="300" y="44" width="32" height="8"/>
+          <rect x="310" y="38" width="16" height="8"/>
+        </g>
+        <!-- 远山(阶梯像素) -->
+        <polygon fill="#a9d9b6" points="0,152 0,122 30,122 30,106 60,106 60,90 90,90 90,74 120,74 120,90 150,90 150,106 180,106 180,90 210,90 210,74 240,74 240,58 270,58 270,74 300,74 300,90 330,90 330,106 360,106 360,90 390,90 390,74 420,74 420,90 450,90 450,106 480,106 480,152"/>
+        <!-- 中山 -->
+        <polygon fill="#6aa87f" points="0,168 0,142 40,142 40,126 80,126 80,110 120,110 120,126 160,126 160,142 200,142 200,126 240,126 240,110 280,110 280,126 320,126 320,142 360,142 360,126 400,126 400,110 440,110 440,126 480,126 480,168"/>
+        <!-- 近山(左) -->
+        <polygon fill="#3f8a5f" points="0,178 0,150 34,150 34,138 70,138 70,150 100,150 100,178"/>
+        <!-- 近山(右) -->
+        <polygon fill="#3f8a5f" points="480,178 480,148 448,148 448,136 410,136 410,148 380,148 380,178"/>
+
+        <!-- 山间溪流(克莱因蓝, 与湖水交融) -->
+        <rect x="236" y="118" width="10" height="50" fill="#002FA7"/>
+        <rect x="239" y="118" width="4" height="50" fill="#3a63d8"/>
+
+        <!-- 克莱因蓝湖水 -->
+        <rect x="0" y="160" width="480" height="110" fill="#002FA7"/>
+        <!-- 山的倒影 -->
+        <polygon fill="#1b4bc0" points="236,160 236,190 250,190 250,178 264,178 264,196 278,196 278,182 292,182 292,160"/>
+        <polygon fill="#1b4bc0" points="120,160 120,184 138,184 138,172 156,172 156,188 174,188 174,160"/>
+        <polygon fill="#1b4bc0" points="340,160 340,186 360,186 360,174 380,174 380,190 400,190 400,160"/>
+        <!-- ============ v2.1 起: 湖水由左向右流动 (v2.7 保留, 反光已删) ============
+             做法: 每层放「图案 + 图案的 +480 副本」, 整体位移一个周期(480),
+             因为首尾画面完全相同, 所以循环处看不出接缝。
+             颜色全部沿用 V1 的 #4a78e0 / #9dff9d, 暗色模式自动跟随既有重着色。 -->
+        <g class="water-flow" clip-path="url(#waterClip)">
+          <use href="#waveTileSlow"/>
+          <use href="#waveTileSlow" transform="translate(480 0)"/>
+        </g>
+        <g class="water-flow fast" clip-path="url(#waterClip)">
+          <use href="#waveTileFast"/>
+          <use href="#waveTileFast" transform="translate(480 0)"/>
+        </g>
+
+        <!-- v2.7: 水面反光整层已删除(只保留流动水纹),
+             原来的反光色 #a9c8ff / #cfe0ff 也随之不再使用。 -->
+
+        <!-- 岸边草地(左) -->
+        <polygon fill="#2f6f4a" points="0,270 0,220 32,220 32,228 74,228 74,238 128,238 128,270"/>
+        <polygon fill="#4c8a68" points="0,220 32,220 32,228 74,228 74,238 128,238 128,244 0,244"/>
+        <!-- 岸边草地(右) -->
+        <polygon fill="#2f6f4a" points="480,270 480,224 452,224 452,232 414,232 414,242 356,242 356,270"/>
+        <polygon fill="#4c8a68" points="480,224 452,224 452,232 414,232 414,242 356,242 356,248 480,248"/>
+
+        <!-- 岸边像素松树 -->
+        <g fill="#1f4f34">
+          <rect x="30" y="204" width="4" height="16"/>
+          <rect x="22" y="210" width="20" height="5"/><rect x="25" y="203" width="14" height="5"/><rect x="28" y="196" width="8" height="5"/>
+          <rect x="96" y="208" width="4" height="16"/>
+          <rect x="88" y="214" width="20" height="5"/><rect x="91" y="207" width="14" height="5"/><rect x="94" y="200" width="8" height="5"/>
+          <rect x="404" y="212" width="4" height="16"/>
+          <rect x="396" y="218" width="20" height="5"/><rect x="399" y="211" width="14" height="5"/><rect x="402" y="204" width="8" height="5"/>
+          <rect x="460" y="206" width="4" height="16"/>
+          <rect x="452" y="212" width="20" height="5"/><rect x="455" y="205" width="14" height="5"/><rect x="458" y="198" width="8" height="5"/>
+        </g>
+
+        <!-- 蘑菇 & 小花 -->
+        <g>
+          <rect x="150" y="250" width="4" height="5" fill="#f0e6d0"/>
+          <rect x="146" y="245" width="12" height="5" fill="#e05858"/>
+          <rect x="149" y="247" width="2" height="2" fill="#ffffff"/>
+          <rect x="154" y="247" width="2" height="2" fill="#ffffff"/>
+          <rect x="330" y="252" width="4" height="5" fill="#f0e6d0"/>
+          <rect x="326" y="247" width="12" height="5" fill="#e05858"/>
+          <rect x="329" y="249" width="2" height="2" fill="#ffffff"/>
+          <rect x="334" y="249" width="2" height="2" fill="#ffffff"/>
+          <rect x="210" y="252" width="3" height="3" fill="#ffd94a"/>
+          <rect x="270" y="250" width="3" height="3" fill="#ffd94a"/>
+        </g>
+
+        <!-- ============ 可爱像素小动物们 ============ -->
+        <!-- 小鸟(飞) -->
+        <g transform="translate(110,46)"><g class="flyer"><g class="animal" data-animal="小鸟">
+          <rect x="0" y="0" width="4" height="2" fill="#3e7d5d"/>
+          <rect x="6" y="0" width="4" height="2" fill="#3e7d5d"/>
+          <rect x="3" y="1" width="4" height="2" fill="#2f6f4a"/>
+        </g></g></g>
+        <g transform="translate(300,60) scale(0.8)"><g class="flyer f2"><g class="animal" data-animal="小鸟">
+          <rect x="0" y="0" width="4" height="2" fill="#3e7d5d"/>
+          <rect x="6" y="0" width="4" height="2" fill="#3e7d5d"/>
+          <rect x="3" y="1" width="4" height="2" fill="#2f6f4a"/>
+        </g></g></g>
+        <!-- 蝴蝶 -->
+        <g transform="translate(205,116)"><g class="flyer f3"><g class="animal" data-animal="蝴蝶">
+          <rect x="4" y="2" width="2" height="5" fill="#22342b"/>
+          <rect x="0" y="1" width="4" height="3" fill="#b06ad0"/>
+          <rect x="6" y="1" width="4" height="3" fill="#b06ad0"/>
+          <rect x="1" y="2" width="1" height="1" fill="#f4ffd9"/>
+          <rect x="8" y="2" width="1" height="1" fill="#f4ffd9"/>
+          <rect x="0" y="4" width="4" height="3" fill="#f0a35e"/>
+          <rect x="6" y="4" width="4" height="3" fill="#f0a35e"/>
+          <rect x="3" y="0" width="1" height="2" fill="#22342b"/>
+          <rect x="6" y="0" width="1" height="2" fill="#22342b"/>
+        </g></g></g>
+        <g transform="translate(352,146)"><g class="flyer f4"><g class="animal" data-animal="蝴蝶">
+          <rect x="4" y="2" width="2" height="5" fill="#22342b"/>
+          <rect x="0" y="1" width="4" height="3" fill="#7ad0e0"/>
+          <rect x="6" y="1" width="4" height="3" fill="#7ad0e0"/>
+          <rect x="0" y="4" width="4" height="3" fill="#ffd94a"/>
+          <rect x="6" y="4" width="4" height="3" fill="#ffd94a"/>
+          <rect x="3" y="0" width="1" height="2" fill="#22342b"/>
+          <rect x="6" y="0" width="1" height="2" fill="#22342b"/>
+        </g></g></g>
+
+        <!-- 鹿(山坡) -->
+        <g transform="translate(62,110)"><g class="animal" data-animal="鹿">
+          <rect x="2" y="14" width="2" height="4" fill="#8a5a2b"/>
+          <rect x="5" y="14" width="2" height="4" fill="#8a5a2b"/>
+          <rect x="9" y="14" width="2" height="4" fill="#8a5a2b"/>
+          <rect x="12" y="14" width="2" height="4" fill="#8a5a2b"/>
+          <rect x="2" y="10" width="12" height="5" fill="#a5713f"/>
+          <rect x="9" y="5" width="4" height="6" fill="#a5713f"/>
+          <rect x="9" y="3" width="5" height="3" fill="#a5713f"/>
+          <rect x="9" y="0" width="1" height="3" fill="#e8c9a0"/>
+          <rect x="13" y="0" width="1" height="3" fill="#e8c9a0"/>
+          <rect x="11" y="4" width="1" height="1" fill="#22342b"/>
+          <rect x="1" y="9" width="2" height="2" fill="#a5713f"/>
+        </g></g>
+        <!-- 狐狸 -->
+        <g transform="translate(152,142)"><g class="animal" data-animal="狐狸">
+          <rect x="0" y="3" width="3" height="5" fill="#ef8f4b"/>
+          <rect x="0" y="2" width="2" height="2" fill="#ffffff"/>
+          <rect x="2" y="4" width="9" height="5" fill="#ef8f4b"/>
+          <rect x="6" y="4" width="7" height="5" fill="#ef8f4b"/>
+          <rect x="7" y="0" width="2" height="4" fill="#ef8f4b"/>
+          <rect x="11" y="0" width="2" height="4" fill="#ef8f4b"/>
+          <rect x="8" y="5" width="1" height="1" fill="#22342b"/>
+          <rect x="12" y="7" width="2" height="2" fill="#22342b"/>
+        </g></g>
+        <!-- 熊 -->
+        <g transform="translate(414,146)"><g class="animal" data-animal="熊">
+          <rect x="2" y="5" width="8" height="8" fill="#a5713f"/>
+          <rect x="2" y="1" width="8" height="6" fill="#a5713f"/>
+          <rect x="1" y="0" width="2" height="2" fill="#a5713f"/>
+          <rect x="9" y="0" width="2" height="2" fill="#a5713f"/>
+          <rect x="1" y="0" width="1" height="1" fill="#d8b48a"/>
+          <rect x="10" y="0" width="1" height="1" fill="#d8b48a"/>
+          <rect x="3" y="3" width="1" height="1" fill="#22342b"/>
+          <rect x="8" y="3" width="1" height="1" fill="#22342b"/>
+          <rect x="5" y="5" width="3" height="2" fill="#d8b48a"/>
+          <rect x="6" y="5" width="1" height="1" fill="#22342b"/>
+        </g></g>
+
+        <!-- 猫(左岸) -->
+        <g transform="translate(12,206)"><g class="animal" data-animal="猫">
+          <rect x="12" y="7" width="2" height="7" fill="#d98a4a"/>
+          <rect x="2" y="8" width="9" height="7" fill="#f0a35e"/>
+          <rect x="4" y="11" width="5" height="4" fill="#ffe0c0"/>
+          <rect x="2" y="2" width="9" height="7" fill="#f0a35e"/>
+          <rect x="2" y="0" width="2" height="3" fill="#f0a35e"/>
+          <rect x="9" y="0" width="2" height="3" fill="#f0a35e"/>
+          <rect x="3" y="1" width="1" height="2" fill="#f4b8c8"/>
+          <rect x="9" y="1" width="1" height="2" fill="#f4b8c8"/>
+          <rect x="4" y="5" width="1" height="1" fill="#22342b"/>
+          <rect x="8" y="5" width="1" height="1" fill="#22342b"/>
+          <rect x="6" y="7" width="1" height="1" fill="#f4b8c8"/>
+          <rect x="3" y="14" width="3" height="2" fill="#e09050"/>
+          <rect x="8" y="14" width="3" height="2" fill="#e09050"/>
+        </g></g>
+        <!-- 狗(左岸) -->
+        <g transform="translate(50,206)"><g class="animal" data-animal="狗">
+          <rect x="12" y="4" width="2" height="5" fill="#c98a4b"/>
+          <rect x="1" y="7" width="11" height="7" fill="#c98a4b"/>
+          <rect x="2" y="2" width="9" height="6" fill="#c98a4b"/>
+          <rect x="0" y="2" width="2" height="5" fill="#8a5a2b"/>
+          <rect x="11" y="2" width="2" height="5" fill="#8a5a2b"/>
+          <rect x="4" y="4" width="1" height="1" fill="#22342b"/>
+          <rect x="8" y="4" width="1" height="1" fill="#22342b"/>
+          <rect x="5" y="6" width="4" height="2" fill="#e8c9a0"/>
+          <rect x="6" y="6" width="2" height="1" fill="#22342b"/>
+          <rect x="6" y="8" width="1" height="2" fill="#f08a8a"/>
+          <rect x="2" y="14" width="3" height="2" fill="#b9793f"/>
+          <rect x="9" y="14" width="3" height="2" fill="#b9793f"/>
+        </g></g>
+        <!-- 松鼠(左岸) -->
+        <g transform="translate(88,205)"><g class="animal" data-animal="松鼠">
+          <rect x="8" y="1" width="3" height="9" fill="#b9793f"/>
+          <rect x="9" y="0" width="3" height="2" fill="#c98a4b"/>
+          <rect x="2" y="8" width="7" height="7" fill="#b9793f"/>
+          <rect x="3" y="10" width="4" height="4" fill="#e8c9a0"/>
+          <rect x="1" y="3" width="6" height="6" fill="#b9793f"/>
+          <rect x="1" y="2" width="2" height="2" fill="#b9793f"/>
+          <rect x="3" y="5" width="1" height="1" fill="#22342b"/>
+        </g></g>
+
+        <!-- 兔子(右岸) -->
+        <g transform="translate(356,210)"><g class="animal" data-animal="兔子">
+          <rect x="3" y="0" width="2" height="5" fill="#f6f6f6"/>
+          <rect x="8" y="0" width="2" height="5" fill="#f6f6f6"/>
+          <rect x="3" y="1" width="1" height="4" fill="#f4b8c8"/>
+          <rect x="8" y="1" width="1" height="4" fill="#f4b8c8"/>
+          <rect x="2" y="5" width="9" height="6" fill="#f6f6f6"/>
+          <rect x="4" y="7" width="1" height="1" fill="#22342b"/>
+          <rect x="8" y="7" width="1" height="1" fill="#22342b"/>
+          <rect x="6" y="9" width="1" height="1" fill="#f4b8c8"/>
+          <rect x="1" y="11" width="11" height="5" fill="#f6f6f6"/>
+          <rect x="11" y="11" width="3" height="3" fill="#ffffff"/>
+        </g></g>
+        <!-- 刺猬(右岸) -->
+        <g transform="translate(398,214)"><g class="animal" data-animal="刺猬">
+          <rect x="1" y="4" width="10" height="5" fill="#a97b4b"/>
+          <rect x="1" y="2" width="2" height="2" fill="#7a5230"/>
+          <rect x="3" y="1" width="2" height="2" fill="#7a5230"/>
+          <rect x="5" y="0" width="2" height="2" fill="#7a5230"/>
+          <rect x="7" y="1" width="2" height="2" fill="#7a5230"/>
+          <rect x="9" y="5" width="4" height="4" fill="#e8c9a0"/>
+          <rect x="12" y="7" width="2" height="2" fill="#22342b"/>
+          <rect x="10" y="6" width="1" height="1" fill="#22342b"/>
+        </g></g>
+
+        <!-- 水里的小动物 -->
+        <!-- 乌龟 -->
+        <g transform="translate(165,194)"><g class="animal" data-animal="乌龟">
+          <rect x="2" y="1" width="8" height="5" fill="#2f7d4f"/>
+          <rect x="4" y="2" width="1" height="1" fill="#1f5c38"/>
+          <rect x="6" y="2" width="1" height="1" fill="#1f5c38"/>
+          <rect x="2" y="3" width="1" height="1" fill="#1f5c38"/>
+          <rect x="10" y="3" width="2" height="2" fill="#6fae8c"/>
+          <rect x="11" y="3" width="1" height="1" fill="#22342b"/>
+          <rect x="2" y="6" width="2" height="2" fill="#2f7d4f"/>
+          <rect x="8" y="6" width="2" height="2" fill="#2f7d4f"/>
+        </g></g>
+        <!-- 鱼 -->
+        <g transform="translate(245,204)"><g class="animal" data-animal="鱼">
+          <rect x="2" y="1" width="6" height="3" fill="#f0a35e"/>
+          <rect x="0" y="0" width="2" height="5" fill="#ef8f4b"/>
+          <rect x="4" y="0" width="2" height="1" fill="#ef8f4b"/>
+          <rect x="6" y="2" width="1" height="1" fill="#22342b"/>
+        </g></g>
+        <!-- 鸭子 -->
+        <g transform="translate(298,184)"><g class="animal" data-animal="鸭子">
+          <rect x="1" y="4" width="9" height="4" fill="#f5d34e"/>
+          <rect x="3" y="5" width="4" height="2" fill="#e8c020"/>
+          <rect x="8" y="1" width="4" height="4" fill="#f5d34e"/>
+          <rect x="12" y="3" width="2" height="2" fill="#f0a35e"/>
+          <rect x="9" y="2" width="1" height="1" fill="#22342b"/>
+        </g></g>
+        <!-- 青蛙 -->
+        <g transform="translate(212,208)"><g class="animal" data-animal="青蛙">
+          <rect x="1" y="3" width="8" height="5" fill="#6fbf5a"/>
+          <rect x="1" y="1" width="2" height="2" fill="#6fbf5a"/>
+          <rect x="6" y="1" width="2" height="2" fill="#6fbf5a"/>
+          <rect x="2" y="2" width="1" height="1" fill="#22342b"/>
+          <rect x="7" y="2" width="1" height="1" fill="#22342b"/>
+          <rect x="3" y="6" width="4" height="1" fill="#2f7d4f"/>
+          <rect x="0" y="6" width="2" height="2" fill="#5aa848"/>
+          <rect x="8" y="6" width="2" height="2" fill="#5aa848"/>
+        </g></g>
+      </svg>
+
+      <!-- 漂浮魔法粒子 -->
+      <div class="pixel-sparks">
+        <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
+        <span class="spark s4"></span><span class="spark s5"></span><span class="spark s6"></span>
+      </div>
+    </div>
+
+    <div class="hero-content container">
+      <p class="hero-kicker">PIXEL FOREST · v2.7</p>
+      <h1 class="hero-name">石胜元</h1>
+      <!-- v2.7: 画面只占 25%, 原来的副标题/简介/8-bit 菜单已移除, 栏目选择交给下面的手柄 -->
+      <p class="hero-hint" id="heroHint">按 A / B / X / Y 选栏目 · 绿屏看留言板 · L / R 切换明暗</p>
+    </div>
+  </section>
+
+  <!-- ========== v2.7: 主页手柄 (按键即导航) ==========
+       每个按键都是真的 <button>: 鼠标能点 / 键盘能 Tab / 读屏能读。
+       A 个人介绍 · B 个人专业 · X 个人兴趣 · Y 联系我 · 绿屏(主板) 留言板
+       L 日间模式 · R 夜间模式 · 十字键 上/下一个栏目 · SELECT 中英文 · MENU 音乐 · START 开始阅读 -->
+  <section class="console-wrap" id="console" aria-label="栏目手柄">
+    <div class="gamepad" id="gamepad">
+
+      <!-- 顶部蓝条: L 肩键 / HOME 小方键 / R 肩键 -->
+      <div class="pad-top">
+        <button class="pad-shoulder" id="padL" type="button" aria-label="L 肩键: 切换日间模式">L</button>
+        <button class="pad-led" id="padHome" type="button" aria-label="HOME: 回到顶部"></button>
+        <button class="pad-shoulder" id="padR" type="button" aria-label="R 肩键: 切换夜间模式">R</button>
+      </div>
+
+      <div class="pad-body">
+        <!-- 十字键: 上/左 = 上一个栏目, 右/下 = 下一个栏目 -->
+        <div class="pad-dpad" role="group" aria-label="十字键: 切换栏目">
+          <button class="dpad-btn dpad-up" data-pad-step="-1" type="button" aria-label="上一个栏目">▲</button>
+          <button class="dpad-btn dpad-left" data-pad-step="-1" type="button" aria-label="上一个栏目">◀</button>
+          <span class="dpad-mid" aria-hidden="true"></span>
+          <button class="dpad-btn dpad-right" data-pad-step="1" type="button" aria-label="下一个栏目">▶</button>
+          <button class="dpad-btn dpad-down" data-pad-step="1" type="button" aria-label="下一个栏目">▼</button>
+        </div>
+
+        <!-- 中间绿屏 = 主板: 显示当前栏目, 点击进留言板 -->
+        <button class="pad-screen" id="padScreen" type="button" aria-label="主板: 进入留言板">
+          <span class="pad-screen-inner">
+            <span class="pad-screen-kicker">PLAYER 01</span>
+            <span class="pad-screen-page" id="padScreenPage">个人介绍</span>
+            <span class="pad-screen-hint" id="padScreenHint">PRESS SCREEN → BOARD</span>
+          </span>
+        </button>
+
+        <!-- ABXY: 四个栏目 (A 黄 / B 粉 / X 蓝 / Y 绿, 与参考图一致) -->
+        <div class="pad-buttons" role="group" aria-label="ABXY 栏目键">
+          <button class="pad-ab pad-x" data-pad-page="hobbies" type="button" aria-label="X 键: 个人兴趣">X</button>
+          <button class="pad-ab pad-y" data-pad-page="contact" type="button" aria-label="Y 键: 联系我">Y</button>
+          <button class="pad-ab pad-a" data-pad-page="intro" type="button" aria-label="A 键: 个人介绍">A</button>
+          <button class="pad-ab pad-b" data-pad-page="major" type="button" aria-label="B 键: 个人专业">B</button>
+        </div>
+      </div>
+
+      <!-- 底部: SELECT 中英文 / MENU 音乐 / START 开始阅读 -->
+      <div class="pad-bottom">
+        <button class="pad-pill" id="padSelect" type="button" aria-label="SELECT: 切换中英文">SELECT</button>
+        <button class="pad-round" id="padMenu" type="button" aria-label="MENU: 播放或暂停音乐">II</button>
+        <button class="pad-pill" id="padStart" type="button" aria-label="START: 开始阅读当前栏目">START</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 页面内容舞台(点击上面选择切换) ========== -->
+  <main class="stage">
+    <div class="container">
+
+      <!-- 个人介绍 -->
+      <section class="page-panel active" id="page-intro" data-page="intro">
+        <h2 class="page-title"></h2>
+        <p class="page-sub"></p>
+        <div class="intro-layout">
+          <figure class="intro-photo">
+            <div class="intro-photo-frame">
+              <img src="assets/images/me-photo.jpg" alt="石胜元" width="720" height="960" />
+            </div>
+            <figcaption class="intro-photo-cap"></figcaption>
+          </figure>
+          <div class="card-grid"></div>
+        </div>
+        <!-- v2.7: 本页像素贴图 —— 分散摆在页面四周(不再挤在右下角);
+             width/height = 贴图原始尺寸的整数倍, 保证像素不被拉糊;
+             left/right/top/bottom 是相对本页的百分比位置。 -->
+        <div class="panel-pets" aria-hidden="true">
+          <svg class="pet px-art" data-animal="松树" viewBox="0 0 20 25" width="40" height="50" style="left:1.5%;top:2%"><use href="#px-pine"/></svg>
+          <svg class="pet px-art" data-animal="松鼠" viewBox="0 0 12 16" width="24" height="32" style="right:3%;top:2%"><use href="#px-squirrel"/></svg>
+          <svg class="pet px-art" data-animal="小花" viewBox="0 0 3 3" width="12" height="12" style="right:25%;top:9%"><use href="#px-flower"/></svg>
+          <svg class="pet px-art" data-animal="鹿" viewBox="0 0 15 19" width="30" height="38" style="right:1%;top:41%"><use href="#px-deer"/></svg>
+          <svg class="pet px-art" data-animal="猫" viewBox="0 0 15 17" width="30" height="34" style="right:3%;bottom:16%"><use href="#px-cat"/></svg>
+          <svg class="pet px-art" data-animal="蘑菇" viewBox="0 0 12 10" width="24" height="20" style="left:2%;bottom:9%"><use href="#px-mushroom"/></svg>
+          <svg class="pet px-art" data-animal="刺猬" viewBox="0 0 13 10" width="26" height="20" style="left:31%;bottom:2%"><use href="#px-hedgehog"/></svg>
+        </div>
+      </section>
+
+      <!-- 个人专业 -->
+      <section class="page-panel" id="page-major" data-page="major">
+        <h2 class="page-title"></h2>
+        <p class="page-sub"></p>
+        <div class="card-grid"></div>
+        <!-- v2.7: 本页像素贴图 (猫头鹰 / 蝴蝶 / 刺猬 / 蘑菇 / 狐狸) —— 分散摆放 -->
+        <div class="panel-pets" aria-hidden="true">
+          <svg class="pet px-art" data-animal="猫头鹰" viewBox="0 0 15 14" width="30" height="28" style="left:2%;top:3%"><use href="#px-owl"/></svg>
+          <svg class="pet px-art" data-animal="蝴蝶" viewBox="0 0 10 8" width="20" height="16" style="right:23%;top:2%"><use href="#px-butterfly2"/></svg>
+          <svg class="pet px-art" data-animal="蘑菇" viewBox="0 0 12 10" width="24" height="20" style="right:2%;top:35%"><use href="#px-mushroom"/></svg>
+          <svg class="pet px-art" data-animal="狐狸" viewBox="0 0 14 10" width="28" height="20" style="left:4%;bottom:6%"><use href="#px-fox"/></svg>
+          <svg class="pet px-art" data-animal="刺猬" viewBox="0 0 13 10" width="26" height="20" style="right:4%;bottom:3%"><use href="#px-hedgehog"/></svg>
+        </div>
+      </section>
+
+      <!-- 个人兴趣 -->
+      <section class="page-panel" id="page-hobbies" data-page="hobbies">
+        <h2 class="page-title"></h2>
+        <p class="page-sub"></p>
+        <div class="hobby-grid" id="hobbyGrid">
+          <button class="hobby-card" data-hobby="badminton" type="button">
+            <div class="hobby-emoji">🏸</div>
+            <h3>羽毛球</h3>
+            <p>从高中体育课的第一次握拍，到如今的业余3级。</p>
+            <span class="hobby-more">点击了解 →</span>
+          </button>
+          <button class="hobby-card" data-hobby="philosophy" type="button">
+            <div class="hobby-emoji">🌌</div>
+            <h3>哲学</h3>
+            <p>从《道德经》到康德，一条追问"人应如何生活"的求索之路。</p>
+            <span class="hobby-more">点击了解 →</span>
+          </button>
+          <button class="hobby-card" data-hobby="music" type="button">
+            <div class="hobby-emoji">🎵</div>
+            <h3>音乐</h3>
+            <p>旋律是情绪的另一种语言，陪伴我度过每个专注的时刻。</p>
+            <span class="hobby-more">点击了解 →</span>
+          </button>
+          <button class="hobby-card" data-hobby="comedy" type="button">
+            <div class="hobby-emoji">🎭</div>
+            <h3>相声</h3>
+            <p>在说学逗唱里体会语言的艺术，也把这份幽默带进生活。</p>
+            <span class="hobby-more">点击了解 →</span>
+          </button>
+        </div>
+        <!-- v2.7: 本页像素贴图 (兔子 / 蝴蝶 / 鸭子 / 青蛙 / 小花) —— 分散摆放 -->
+        <div class="panel-pets" aria-hidden="true">
+          <svg class="pet px-art" data-animal="兔子" viewBox="0 0 14 17" width="28" height="34" style="left:1.5%;top:4%"><use href="#px-hare"/></svg>
+          <svg class="pet px-art" data-animal="蝴蝶" viewBox="0 0 10 8" width="20" height="16" style="right:6%;top:3%"><use href="#px-butterfly"/></svg>
+          <svg class="pet px-art" data-animal="小花" viewBox="0 0 3 3" width="12" height="12" style="left:47%;top:1%"><use href="#px-flower"/></svg>
+          <svg class="pet px-art" data-animal="蝴蝶" viewBox="0 0 10 8" width="20" height="16" style="right:2%;top:39%"><use href="#px-butterfly2"/></svg>
+          <svg class="pet px-art" data-animal="鸭子" viewBox="0 0 15 8" width="30" height="16" style="left:2%;bottom:5%"><use href="#px-duck"/></svg>
+          <svg class="pet px-art" data-animal="青蛙" viewBox="0 0 11 9" width="22" height="18" style="right:5%;bottom:8%"><use href="#px-frog"/></svg>
+        </div>
+      </section>
+
+      <!-- 联系我 -->
+      <section class="page-panel" id="page-contact" data-page="contact">
+        <h2 class="page-title"></h2>
+        <p class="page-sub"></p>
+        <!-- v3.0 反馈入口: 访客在这里写意见(不改设计, 视觉沿用既有像素卡片风格) -->
+        <div class="feedback-entry" id="feedbackEntry">
+          <button class="feedback-entry-btn" type="button" data-feedback-open>
+            <span class="feedback-entry-icon" aria-hidden="true">📮</span>
+            <span class="feedback-entry-text">
+              <strong id="feedbackEntryTitle"></strong>
+              <em id="feedbackEntryDesc"></em>
+            </span>
+            <span class="feedback-entry-go" id="feedbackEntryGo" aria-hidden="true">→</span>
+          </button>
+          <p class="feedback-pending" id="feedbackPending" hidden></p>
+        </div>
+        <div class="contact-grid"></div>
+        <!-- v2.7: 本页像素贴图 (送信的鸟 / 云 / 小鸟 / 鱼 / 鸭子) —— 分散摆放 -->
+        <div class="panel-pets" aria-hidden="true">
+          <svg class="pet px-art" data-animal="云" viewBox="0 0 36 14" width="72" height="28" style="right:3%;top:1%"><use href="#px-cloud"/></svg>
+          <svg class="pet px-art" data-animal="送信的鸟" viewBox="0 0 21 9" width="63" height="27" style="left:1%;top:7%"><use href="#px-mailbird"/></svg>
+          <svg class="pet px-art" data-animal="小鸟" viewBox="0 0 10 3" width="30" height="9" style="right:21%;top:26%"><use href="#px-bird"/></svg>
+          <svg class="pet px-art" data-animal="鱼" viewBox="0 0 8 6" width="24" height="18" style="left:2%;bottom:8%"><use href="#px-fish"/></svg>
+          <svg class="pet px-art" data-animal="鸭子" viewBox="0 0 15 8" width="30" height="16" style="right:2%;bottom:4%"><use href="#px-duck"/></svg>
+        </div>
+      </section>
+
+      <!-- 留言板 -->
+      <section class="page-panel" id="page-board" data-page="board">
+        <h2 class="page-title"></h2>
+        <p class="page-sub"></p>
+        <div class="board-wrap">
+          <form class="board-form" id="boardForm" autocomplete="off">
+            <input type="text" id="boardName" maxlength="20" />
+            <textarea id="boardText" rows="3" maxlength="500"></textarea>
+            <button id="boardSend" type="submit"></button>
+          </form>
+          <div class="board-list" id="boardList"></div>
+          <p class="board-note" id="boardNote"></p>
+          <!-- v3.0: 留言板里的次级反馈入口(想提具体建议的人, 走结构化的反馈表) -->
+          <p class="board-feedback-link">
+            <button type="button" class="link-btn" id="boardFeedbackBtn" data-feedback-open></button>
+          </p>
+        </div>
+        <!-- v2.7: 本页像素贴图 (送信的鸟 / 猫头鹰 / 蘑菇 / 青蛙 / 乌龟) —— 分散摆放 -->
+        <div class="panel-pets" aria-hidden="true">
+          <svg class="pet px-art" data-animal="送信的鸟" viewBox="0 0 21 9" width="63" height="27" style="left:1%;top:4%"><use href="#px-mailbird"/></svg>
+          <svg class="pet px-art" data-animal="猫头鹰" viewBox="0 0 15 14" width="30" height="28" style="right:4%;top:2%"><use href="#px-owl"/></svg>
+          <svg class="pet px-art" data-animal="蘑菇" viewBox="0 0 12 10" width="24" height="20" style="left:2%;bottom:13%"><use href="#px-mushroom"/></svg>
+          <svg class="pet px-art" data-animal="青蛙" viewBox="0 0 11 9" width="22" height="18" style="right:9%;bottom:15%"><use href="#px-frog"/></svg>
+          <svg class="pet px-art" data-animal="乌龟" viewBox="0 0 13 9" width="26" height="18" style="right:35%;bottom:2%"><use href="#px-turtle"/></svg>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========== 页脚 ========== -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>© <span id="year">2026</span> 石胜元 · 用热爱与好奇，认真生活</p>
+      <p class="footer-note">本项目为课程作业 · 纯静态实现 · 零构建依赖</p>
+    </div>
+  </footer>
+
+  <!-- ========== 弹窗(子页面) ========== -->
+  <div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <span class="modal-emoji" id="modalEmoji"></span>
+        <h3 class="modal-title" id="modalTitle"></h3>
+        <button class="modal-close" id="modalClose" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- ========== v3.0 反馈弹窗 (feedback) ==========
+       字段: 名字或昵称(可选) / 与主页主人的关系 / 本条反馈针对的设备 / 反馈内容(必填)
+       提交时间与网站版本由系统自动附带, 不要求访客填写。
+       复用 v1 就有的 .modal-overlay / .modal 外壳, 只加内容, 不动原有设计。 -->
+  <div class="modal-overlay" id="feedbackOverlay" hidden>
+    <div class="modal feedback-modal" role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+      <div class="modal-head">
+        <span class="modal-emoji" aria-hidden="true">📮</span>
+        <h3 class="modal-title" id="fbTitle"></h3>
+        <button class="modal-close" id="fbClose" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="fb-intro" id="fbIntro"></p>
+        <form class="fb-form" id="fbForm" novalidate>
+          <!-- 1. 名字或昵称(可选) -->
+          <div class="fb-field">
+            <label class="fb-label" for="fbNickname" id="fbNicknameLabel"></label>
+            <input type="text" id="fbNickname" name="nickname" maxlength="40" autocomplete="nickname" />
+            <p class="fb-hint" id="fbNicknameHint"></p>
+          </div>
+
+          <!-- 2. 与主页主人的关系 -->
+          <fieldset class="fb-field fb-fieldset">
+            <legend class="fb-label" id="fbRelationLabel"></legend>
+            <div class="fb-options" id="fbRelation" role="radiogroup" aria-labelledby="fbRelationLabel"></div>
+            <p class="fb-error" id="fbRelationError" hidden></p>
+          </fieldset>
+
+          <!-- 3. 本条反馈针对的设备 -->
+          <fieldset class="fb-field fb-fieldset">
+            <legend class="fb-label" id="fbDeviceLabel"></legend>
+            <div class="fb-options" id="fbDevice" role="radiogroup" aria-labelledby="fbDeviceLabel"></div>
+            <p class="fb-error" id="fbDeviceError" hidden></p>
+          </fieldset>
+
+          <!-- 4. 反馈内容(必填) -->
+          <div class="fb-field">
+            <label class="fb-label" for="fbContent" id="fbContentLabel"></label>
+            <textarea id="fbContent" name="content" rows="5" maxlength="1000"></textarea>
+            <div class="fb-meta">
+              <p class="fb-hint" id="fbContentHint"></p>
+              <span class="fb-count" id="fbCount"></span>
+            </div>
+            <p class="fb-error" id="fbContentError" hidden></p>
+          </div>
+
+          <!-- 5. 自动附带说明(提交时间 / 网站版本, 不用访客填) -->
+          <p class="fb-auto" id="fbAuto"></p>
+
+          <div class="fb-actions">
+            <button class="fb-submit" id="fbSubmit" type="submit"></button>
+            <button class="fb-cancel" id="fbCancel" type="button"></button>
+          </div>
+          <p class="fb-status" id="fbStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 我的分身 (像素机器人, 5 问 5 答) ========== -->
+  <div class="bot-widget" id="botWidget">
+    <button class="bot-toggle" id="botToggle" type="button" aria-label="问问我的分身">🤖</button>
+    <div class="bot-panel" id="botPanel" hidden>
+      <div class="bot-head">
+        <span class="bot-avatar" aria-hidden="true">🤖</span>
+        <span class="bot-title" id="botTitle">我的分身</span>
+        <button class="bot-close" id="botClose" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="bot-log" id="botLog"></div>
+      <div class="bot-qs" id="botQs"></div>
+      <div class="bot-form">
+        <input type="text" id="botInput" maxlength="60" autocomplete="off" />
+        <button id="botSend" type="button"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 聊天 / 留言 ========== -->
+  <div class="chat-widget" id="chatWidget">
+    <button class="chat-toggle" id="chatToggle" type="button" aria-label="聊天气泡">💬</button>
+    <div class="chat-panel" id="chatPanel" hidden>
+      <div class="chat-head">
+        <span>有什么想对我说的？</span>
+        <button class="chat-close" id="chatClose" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="chat-log" id="chatLog"></div>
+      <div class="chat-form">
+        <input type="text" id="chatInput" placeholder="输入你的话..." maxlength="500" autocomplete="off" />
+        <button id="chatSend" type="button">发送</button>
+      </div>
+      <div class="chat-note">留言保存在本地浏览器 · 后续可接入 Supabase 后端</div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <!-- v3.0 反馈: 后台用 Supabase。supabase-js 走 CDN, 加载失败会自动降级为本机暂存, 页面不受影响。
+       js/config.js 放 Project URL / anon key, 该文件已在 .gitignore 中(不提交 Git);
+       没有这个文件时控制台会有一条 404, 属正常, 站点照常运行。 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/feedback.js" defer></script>
+</body>
+</html>
