@@ -8,7 +8,8 @@
  *
  *  数据流：
  *    表单 → 校验 → 附带「网站版本 + 所在栏目」→ 写进 Supabase 的 feedback 表
- *         ↘ 网络不通 / 还没配 config.js 时：先暂存在本机 localStorage（outbox），
+ *         ↘ 直连被阻断、但配了中转（relayUrl）时：自动改走中转，访客无感
+ *         ↘ 两者都不通 / 还没配 config.js 时：先暂存在本机 localStorage（outbox），
  *           等下次打开页面自动补交，保证「能收到」不会因为一次断网而丢掉。
  *
  *  想查反馈：
@@ -19,6 +20,7 @@
  *    · js/data.js    —— 中英文案（SITE_DATA.lang.*.feedback）
  *    · js/config.js  —— Supabase 配置（该文件被 .gitignore 忽略，不入 Git）
  *    · @supabase/supabase-js v2（CDN，可选：加载失败就走本机暂存，页面照常可用）
+ *    · js/config.js 的 relayUrl（可选，留空即关闭）—— 直连被阻断时的中转兜底
  * ============================================================ */
 
 (function () {
@@ -196,10 +198,12 @@
     return readOutbox().length;
   }
 
-  /* ---------- 写库 ---------- */
-  function insertRow(payload) {
+  /* ---------- 写库：直连优先，失败自动降级到中转 ---------- */
+
+  /* 直连：Supabase 官方客户端（原来唯一的通路，行为不变） */
+  function insertDirect(payload) {
     var client = getClient();
-    if (!client) return Promise.resolve({ ok: false, offline: true });
+    if (!client) return Promise.resolve({ ok: false, skipped: "no-client" });
     try {
       return client
         .from(tableName())
@@ -216,11 +220,80 @@
     }
   }
 
+  /* 中转配置：relayUrl 留空 / 还是占位符 → 视为未启用（默认就是这样） */
+  function relay() {
+    var cfg = window.SUPABASE_CONFIG;
+    if (!cfg || !cfg.relayUrl) return null;
+    var url = String(cfg.relayUrl).trim();
+    if (!url || /your-relay/i.test(url)) return null;
+    return { url: url, token: cfg.relayToken ? String(cfg.relayToken) : "" };
+  }
+
+  /* 中转：把同一条记录 POST 给云函数，由云函数代写数据库 */
+  function insertRelay(payload) {
+    var rc = relay();
+    if (!rc) return Promise.resolve({ ok: false, skipped: "no-relay" });
+    if (typeof window.fetch !== "function") return Promise.resolve({ ok: false, skipped: "no-fetch" });
+    var headers = { "Content-Type": "application/json" };
+    if (rc.token) headers["X-Relay-Token"] = rc.token;
+    return window
+      .fetch(rc.url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(payload),
+        mode: "cors",
+        credentials: "omit",
+        cache: "no-store"
+      })
+      .then(function (res) {
+        if (!res || !res.ok) return { ok: false, error: "relay-http-" + (res ? res.status : "0") };
+        return { ok: true };
+      })
+      .catch(function (err) {
+        return { ok: false, error: err };
+      });
+  }
+
+  /* 只在「配了中转」时才给直连加超时：不让访客在被阻断的网络上干等。
+     代价：万一直连 8 秒后才慢慢成功，可能和中转各存一条（极少见）。
+     没配中转时完全不介入，行为与改造前一致。 */
+  var DIRECT_TIMEOUT = 8000;
+
+  function withTimeout(promise, ms) {
+    return new Promise(function (resolve) {
+      var done = false;
+      var finish = function (v) {
+        if (done) return;
+        done = true;
+        resolve(v);
+      };
+      window.setTimeout(function () {
+        finish({ ok: false, error: "timeout" });
+      }, ms);
+      promise.then(finish, function (err) {
+        finish({ ok: false, error: err });
+      });
+    });
+  }
+
+  /* 交付顺序：直连 →（配了中转且直连没成）中转 → 交给调用方存 outbox */
+  function insertRow(payload) {
+    var first = insertDirect(payload);
+    if (relay()) first = withTimeout(first, DIRECT_TIMEOUT);
+    return first.then(function (r) {
+      if (r && r.ok) return { ok: true, via: "direct" };
+      return insertRelay(payload).then(function (r2) {
+        if (r2 && r2.ok) return { ok: true, via: "relay" };
+        return { ok: false, direct: r, relay: r2 };
+      });
+    });
+  }
+
   /* 把待发件箱里的反馈逐条补交，成功的移出队列 */
   function flushOutbox() {
     var arr = readOutbox();
-    var client = getClient();
-    if (!client || !arr.length) return Promise.resolve(0);
+    /* 有直连、或有中转，才有必要尝试补交 */
+    if (!arr.length || (!getClient() && !relay())) return Promise.resolve(0);
     var sent = 0;
     var chain = Promise.resolve();
     arr.forEach(function (item) {
@@ -270,6 +343,12 @@
 
     var btns = document.querySelectorAll("[data-feedback-open]");
     Array.prototype.forEach.call(btns, function (btn) {
+      /* 入口卡片那个按钮内部是「图标 + 标题 + 说明 + 箭头」四块结构，
+         其中三块的文案已由上面三行分别写入（见 index.html 的 feedbackEntry）。
+         它的外层按钮自己也带 data-feedback-open，所以会走到这里；
+         一旦对它整体覆盖 textContent，那四块结构会被直接删掉，
+         入口就只剩一行光秃秃的文字 —— 必须跳过它。 */
+      if (btn.closest && btn.closest("#feedbackEntry")) return;
       if (btn.id === "boardFeedbackBtn") btn.textContent = T.boardLink;
       else btn.textContent = T.entryTitle;
     });
@@ -453,6 +532,7 @@
 
   /* ---------- 提交 ---------- */
   var sending = false;
+  var lastVia = null; // 最近一次成功走的是哪条通路："direct" / "relay"（供排查用）
 
   function setStatus(text, kind) {
     if (!statusEl) return;
@@ -473,6 +553,7 @@
 
     insertRow(payload).then(function (res) {
       sending = false;
+      lastVia = res && res.via ? res.via : null;
       if (submitBtn) submitBtn.disabled = false;
 
       if (res.ok) {
@@ -542,7 +623,11 @@
     },
     /* 供 admin.html 等外部读取（调试用） */
     version: "v3.0",
-    pendingCount: outboxCount
+    pendingCount: outboxCount,
+    /* 最近一次成功走的是「直连」还是「中转」（排查用；没提交过则为 null） */
+    lastVia: function () { return lastVia; },
+    /* 是否已配置中转兜底 */
+    relayReady: function () { return !!relay(); }
   };
   window.SiteFeedback = api;
 
