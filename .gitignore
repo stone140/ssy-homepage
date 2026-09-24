@@ -3,9 +3,13 @@
 Thumbs.db
 Desktop.ini
 
-# 本地密钥 / 配置（永不发布到公开仓库）
-js/config.js
-config.js
+# 本地密钥 / 配置
+# 说明：js/config.js 自 v3.0 起改为「故意发布」到线上。
+#   它里面只有 Supabase 项目 URL 和 anon（匿名）公钥 —— 按 Supabase 的设计，
+#   这两项本来就是要写在前端页面里的公开信息；真正的安全边界在数据库的
+#   RLS 策略：feedback 表对 anon 只开 INSERT、不开 SELECT（见 sql/feedback.sql）。
+#   真正的私钥（service_role key）绝不进本仓库，也不进本机任何被跟踪的文件。
+#   以下本地文件继续忽略：
 .env
 .env.*
 local-config.*
