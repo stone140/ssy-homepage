@@ -187,11 +187,13 @@
     }
   }
 
+  /* 存进待发件箱；返回这一条的 id（调用方可能要在它「迟到成功」后把这条撤回） */
   function pushOutbox(payload) {
     var arr = readOutbox();
-    arr.push({ id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8), at: new Date().toISOString(), payload: payload });
+    var id = String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8);
+    arr.push({ id: id, at: new Date().toISOString(), payload: payload });
     writeOutbox(arr);
-    return arr.length;
+    return id;
   }
 
   function outboxCount() {
@@ -254,9 +256,9 @@
       });
   }
 
-  /* 只在「配了中转」时才给直连加超时：不让访客在被阻断的网络上干等。
-     代价：万一直连 8 秒后才慢慢成功，可能和中转各存一条（极少见）。
-     没配中转时完全不介入，行为与改造前一致。 */
+  /* 直连一律加 8 秒超时：不让访客在被阻断的网络上干等（黑洞式阻断尤其明显）。
+     超时只是「不再等」，那条直连请求其实还在后台跑着；万一它稍后真的成功了，
+     调用方会用返回里的 late 把刚存进 outbox 的那条撤回，避免重复入库。 */
   var DIRECT_TIMEOUT = 8000;
 
   function withTimeout(promise, ms) {
@@ -276,15 +278,15 @@
     });
   }
 
-  /* 交付顺序：直连 →（配了中转且直连没成）中转 → 交给调用方存 outbox */
+  /* 交付顺序：直连（带超时）→（配了中转且直连没成）中转 → 交给调用方存 outbox。
+     返回值的 late = 「已被超时放弃、但仍可能成功」的直连请求（没有则为 null）。 */
   function insertRow(payload) {
-    var first = insertDirect(payload);
-    if (relay()) first = withTimeout(first, DIRECT_TIMEOUT);
-    return first.then(function (r) {
-      if (r && r.ok) return { ok: true, via: "direct" };
+    var direct = insertDirect(payload);
+    return withTimeout(direct, DIRECT_TIMEOUT).then(function (r) {
+      if (r && r.ok) return { ok: true, via: "direct", late: null };
       return insertRelay(payload).then(function (r2) {
-        if (r2 && r2.ok) return { ok: true, via: "relay" };
-        return { ok: false, direct: r, relay: r2 };
+        if (r2 && r2.ok) return { ok: true, via: "relay", late: null };
+        return { ok: false, direct: r, relay: r2, late: r.error === "timeout" ? direct : null };
       });
     });
   }
@@ -565,10 +567,26 @@
       }
 
       // 没配 config.js（offline）或网络失败：先存本机，保证不丢
-      pushOutbox(payload);
+      var itemId = pushOutbox(payload);
       setStatus(t().queued, "warn");
       resetForm();
       renderEntry();
+
+      // 刚才是 8 秒超时、但那条直连稍后其实成功了 → 撤回本机这条，并把提示升级为成功
+      // （故意不自动关弹窗：访客很可能已经在写第二条了）
+      if (res.late) {
+        res.late.then(function (r2) {
+          if (!r2 || !r2.ok) return;
+          writeOutbox(
+            readOutbox().filter(function (x) {
+              return x.id !== itemId;
+            })
+          );
+          lastVia = "direct";
+          setStatus(t().ok, "ok");
+          renderEntry();
+        });
+      }
     });
   }
 
@@ -622,7 +640,7 @@
       if (isOpen()) renderModal();
     },
     /* 供 admin.html 等外部读取（调试用） */
-    version: "v3.0",
+    version: "v3.1",
     pendingCount: outboxCount,
     /* 最近一次成功走的是「直连」还是「中转」（排查用；没提交过则为 null） */
     lastVia: function () { return lastVia; },
