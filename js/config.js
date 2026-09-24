@@ -1,5 +1,5 @@
 /* ============================================================
- * config.example.js —— Supabase 配置模板（v3.0 反馈功能）
+ * config.js —— Supabase 配置（本机实际使用，v3.0 反馈功能）
  *
  * 【怎么用】
  *   1. 把本文件复制一份，改名为  config.js  （同目录，即 js/config.js）
@@ -11,9 +11,14 @@
  *     · Project URL      → 填到下面的 url
  *     · Project API keys → anon / public 那一把 → 填到下面的 anonKey
  *
- * 【为什么单独一个文件】
- *   js/config.js 已写进 .gitignore，不会被提交到 Git / GitHub，
- *   所以密钥不会被公开。本文件（config.example.js）只有占位符，可以安全提交。
+ * 【关于密钥会不会被公开】
+ *   js/config.js 自 v3.0 起是「故意发布」到线上的：它里面只有项目 URL 和
+ *   anon 公钥，而这两项按 Supabase 的设计本来就是给前端公开用的。
+ *   真正的安全边界在数据库的 RLS 策略 —— feedback 表对 anon 只开 INSERT、
+ *   不开 SELECT（见 sql/feedback.sql），所以别人即使拿到这把 key，
+ *   也读不到你收到的任何反馈。
+ *   ⚠ 唯独 service_role（服务端）那把 key 绝不能写进这里或任何前端文件。
+ *   本文件（config.example.js）只有占位符，同样可以安全提交。
  *
  * 【不配置会怎样】
  *   站点照常运行：反馈表单仍然可用，提交内容会先暂存在访客本机浏览器，
@@ -32,5 +37,15 @@ window.SUPABASE_CONFIG = {
 
   /* 网站版本号：留空则自动从页面标题里抓取（例如「v2.7」）。
      想固定就写死，例如 "v3.0"。 */
-  siteVersion: "v3.0"
+  siteVersion: "v3.0",
+
+  /* ============ 中转兜底（可选，留空 = 只走直连）============
+     直连失败时会自动改走中转；两者都失败才暂存访客本机（outbox）。
+     部署与填写方法见 relay/README.md。
+     当前尚未部署中转，所以先留空 —— 留空完全不影响使用。 */
+  relayUrl: "",
+
+  /* 中转口令：与云函数 RELAY_TOKEN 环境变量保持一致；
+     留空 = 不带口令（云函数侧也不校验）。 */
+  relayToken: ""
 };
