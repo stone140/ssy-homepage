@@ -2,7 +2,7 @@
  * main.js —— 页面交互逻辑 (v2.7)
  *  - 主页手柄: A/B/X/Y + 十字键 + 绿屏 + L/R + SELECT/MENU/START (initGamepad)
  *  - 顶部「页面选择」: 5 页切换 (个人介绍/个人专业/个人兴趣/联系我/留言板)
- *  - 我的分身: 5 问 5 答 (关键词匹配)
+ *  - 我的分身: v4.0 真实大模型 (js/avatar.js + Supabase Edge Function)
  *  - 中英切换(i18n)
  *  - 子页面弹窗(点击兴趣卡片)
  *  - 聊天 / 留言(本地 localStorage, 预留后端接入)
@@ -288,7 +288,9 @@
     if (e.key === "Escape") {
       if (modalOpen) closeModal();
       if (!$("#chatPanel").hidden) toggleChat(false);
-      if (botPanel && !botPanel.hidden) toggleBot(false);
+      if (window.SiteAvatar && window.SiteAvatar.isOpen()) {
+        window.SiteAvatar.close();
+      }
     }
   });
 
@@ -438,102 +440,11 @@
       .replace(/"/g, "&quot;");
   }
 
-  /* ============ 6. 我的分身 (5 问 5 答 · 关键词匹配) ============ */
-  const botToggle = $("#botToggle");
-  const botPanel = $("#botPanel");
-  const botClose = $("#botClose");
-  const botLog = $("#botLog");
-  const botQs = $("#botQs");
-  const botInput = $("#botInput");
-  const botSend = $("#botSend");
-
-  function botData() {
-    return SITE_DATA.lang[currentLang].bot || { qa: [] };
-  }
-
+  /* ============ 6. 我的分身 (v4.0 · 真实大模型) ============ */
+  // 具体逻辑在 js/avatar.js：检索知识库 → 调 Supabase Edge Function → DeepSeek。
+  // main.js 只保留语言切换时的刷新入口，避免两套逻辑同时绑定 DOM。
   function renderBotTexts() {
-    const b = botData();
-    const t = $("#botTitle");
-    if (t) t.textContent = b.title || "";
-    if (botInput) botInput.placeholder = b.placeholder || "";
-    if (botSend) botSend.textContent = b.ask || "";
-    if (botToggle) botToggle.setAttribute("aria-label", b.open || b.title || "");
-
-    // 问题按钮
-    if (botQs) {
-      botQs.innerHTML = "";
-      (b.qa || []).forEach((item, i) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "bot-q";
-        btn.textContent = item.q;
-        btn.addEventListener("click", () => askBot(i));
-        botQs.appendChild(btn);
-      });
-    }
-
-    // 打招呼 (切换语言时重置, 保持语言一致)
-    if (botLog) {
-      botLog.innerHTML = "";
-      botSay("bot", b.hint || "");
-    }
-  }
-
-  function botSay(who, text) {
-    if (!botLog || !text) return;
-    const row = document.createElement("div");
-    row.className = "bot-msg " + (who === "me" ? "bot-msg-me" : "bot-msg-bot");
-    row.textContent = text;
-    botLog.appendChild(row);
-    botLog.scrollTop = botLog.scrollHeight;
-  }
-
-  function askBot(index) {
-    const b = botData();
-    const item = (b.qa || [])[index];
-    if (!item) return;
-    botSay("me", item.q);
-    botSay("bot", item.a);
-  }
-
-  function askBotText(text) {
-    const q = String(text || "").trim();
-    if (!q) return;
-    const b = botData();
-    botSay("me", q);
-    const lower = q.toLowerCase();
-    let found = null;
-    (b.qa || []).forEach((item) => {
-      if (found) return;
-      const keys = item.k || [];
-      if (keys.some((k) => lower.indexOf(String(k).toLowerCase()) !== -1)) found = item;
-    });
-    botSay("bot", found ? found.a : b.fallback || "");
-  }
-
-  function toggleBot(open) {
-    if (!botPanel) return;
-    const show = open !== undefined ? open : botPanel.hidden;
-    botPanel.hidden = !show;
-    if (botToggle) botToggle.classList.toggle("active", show);
-    if (show && botInput) botInput.focus();
-  }
-
-  if (botToggle) botToggle.addEventListener("click", () => toggleBot());
-  if (botClose) botClose.addEventListener("click", () => toggleBot(false));
-  if (botSend) {
-    botSend.addEventListener("click", () => {
-      askBotText(botInput ? botInput.value : "");
-      if (botInput) botInput.value = "";
-    });
-  }
-  if (botInput) {
-    botInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        askBotText(botInput.value);
-        botInput.value = "";
-      }
-    });
+    if (window.SiteAvatar) window.SiteAvatar.refresh();
   }
 
   /* ============ 移动端菜单 ============ */

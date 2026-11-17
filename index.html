@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>石胜元 · 个人主页 (v2.7 · 像素山水 + 自由漫游的动物 + 我的分身 + 留言板)</title>
-  <meta name="description" content="石胜元的个人主页 —— 一个来自甘肃、充满好奇与幽默的大一新生。" />
+  <title>石胜元 · 个人主页 (v4.0 · 像素森林 + 真实大模型分身 + 留言板)</title>
+  <meta name="description" content="石胜元的个人主页 —— 一个来自甘肃、充满好奇与幽默的大一新生；页面上的数字分身已接入真实大语言模型。" />
+  <link rel="icon" type="image/png" href="assets/images/me-pixel.png" />
   <link rel="stylesheet" href="css/style.css" />
   <!-- 明暗模式: 提前恢复上次选择, 避免刷新时闪一下亮色 -->
   <script>
@@ -212,7 +213,7 @@
   <!-- ========== 顶部导航 / 页面选择 ========== -->
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="#top"><span class="brand-mark">石</span><span class="brand-text">石胜元</span>      <span class="version-tag">v2.7</span></a>
+      <a class="brand" href="#top"><span class="brand-mark">石</span><span class="brand-text">石胜元</span>      <span class="version-tag">v4.0</span></a>
       <nav class="site-nav" id="siteNav">
         <ul>
           <li><a href="#page-intro" data-page="intro">个人介绍</a></li>
@@ -608,7 +609,7 @@
     </div>
 
     <div class="hero-content container">
-      <p class="hero-kicker">PIXEL FOREST · v2.7</p>
+      <p class="hero-kicker">PIXEL FOREST · v4.0</p>
       <h1 class="hero-name">石胜元</h1>
       <!-- v2.7: 画面只占 25%, 原来的副标题/简介/8-bit 菜单已移除, 栏目选择交给下面的手柄 -->
       <p class="hero-hint" id="heroHint">按 A / B / X / Y 选栏目 · 绿屏看留言板 · L / R 切换明暗</p>
@@ -889,19 +890,21 @@
     </div>
   </div>
 
-  <!-- ========== 我的分身 (像素机器人, 5 问 5 答) ========== -->
+  <!-- ========== 我的分身 (v4.0: 真实大模型 + 知识库检索) ========== -->
   <div class="bot-widget" id="botWidget">
     <button class="bot-toggle" id="botToggle" type="button" aria-label="问问我的分身">🤖</button>
     <div class="bot-panel" id="botPanel" hidden>
       <div class="bot-head">
         <span class="bot-avatar" aria-hidden="true">🤖</span>
         <span class="bot-title" id="botTitle">我的分身</span>
+        <button class="bot-clear" id="botClear" type="button" aria-label="清空对话">清空</button>
         <button class="bot-close" id="botClose" type="button" aria-label="关闭">×</button>
       </div>
-      <div class="bot-log" id="botLog"></div>
+      <div class="bot-log" id="botLog" aria-live="polite"></div>
       <div class="bot-qs" id="botQs"></div>
+      <div class="bot-status" id="botStatus"></div>
       <div class="bot-form">
-        <input type="text" id="botInput" maxlength="60" autocomplete="off" />
+        <input type="text" id="botInput" maxlength="300" autocomplete="off" aria-label="输入你的问题" />
         <button id="botSend" type="button"></button>
       </div>
     </div>
@@ -925,6 +928,10 @@
   </div>
 
   <script src="js/data.js"></script>
+  <!-- v4.0 数字分身：配置 / UI 文案 / 真实大模型调用逻辑 -->
+  <script src="js/avatar-config.js"></script>
+  <script src="js/persona.js"></script>
+  <script src="js/avatar.js"></script>
   <script src="js/main.js"></script>
   <!-- v3.0 反馈: 后台用 Supabase。supabase-js 走 CDN, 加载失败会自动降级为本机暂存, 页面不受影响。
        js/config.js 放 Project URL / anon key, 该文件已在 .gitignore 中(不提交 Git);

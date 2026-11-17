@@ -10,7 +10,7 @@ const SITE_DATA = {
     zh: {
       /* 页面选择(顶部导航 + 画面菜单共用) */
       nav: { intro: "个人介绍", major: "个人专业", hobbies: "个人兴趣", contact: "联系我", board: "留言板" },
-      heroKicker: "PIXEL FOREST · v2.7",
+      heroKicker: "PIXEL FOREST · v4.0",
       heroSub: "tju-polyu · 计算机科学与技术",
       heroIntro: "一个从甘肃来的懵懂无知、充满好奇、非常幽默的大一新生。",
       menuHint: "按 A/B/X/Y 选栏目 · 绿屏进留言板 · L/R 切明暗",
@@ -63,7 +63,7 @@ const SITE_DATA = {
         { icon: "💬", label: "微信", value: "ssyishappy", href: "" },
         { icon: "🐧", label: "QQ", value: "663579961", href: "" },
       ],
-      footer: { text: "石胜元 · 用热爱与好奇，认真生活", note: "本项目为课程作业 · 纯静态实现 · 零构建依赖" },
+      footer: { text: "石胜元 · 用热爱与好奇，认真生活", note: "本项目为课程作业 · 静态页面 + Serverless 分身 · 零构建依赖" },
       theme: { dark: "切换到黑夜模式", light: "切换到明亮模式" },
       chat: {
         title: "有什么想对我说的？",
@@ -79,21 +79,8 @@ const SITE_DATA = {
         play: "播放最爱音乐",
         pause: "暂停音乐",
       },
-      bot: {
-        title: "我的分身",
-        open: "问问我的分身",
-        hint: "我是石胜元的分身，点下面的问题或直接提问，我来回答～",
-        placeholder: "输入你的问题...",
-        ask: "提问",
-        fallback: "这个问题我还没学会～不如试试下面的问题？",
-        qa: [
-          { q: "你是谁？", a: "我是石胜元的分身，一个住在网页里的小像素人。他的经历和想法，我都记得清清楚楚。", k: ["你是谁", "谁", "who", "名字"] },
-          { q: "你从哪里来？", a: "我从甘肃来，一个被黄土和群山环抱的地方。现在一路向东，在天津求学。", k: ["哪里", "哪来", "家乡", "来自", "gansu", "from", "where"] },
-          { q: "你学什么专业？", a: "我在天津大学—香港理工大学联合培养项目，读计算机科学与技术。", k: ["专业", "学什么", "major", "computer", "计算机"] },
-          { q: "你有什么爱好？", a: "我爱打羽毛球、读哲学、听音乐，还喜欢相声。运动和思考，一个都不少。", k: ["爱好", "兴趣", "喜欢", "hobby", "interest"] },
-          { q: "你想成为什么样的人？", a: "保持好奇、认真生活，做一个有趣又有用的人。这是我一直在走的路。", k: ["成为", "目标", "理想", "梦想", "future", "goal", "dream"] },
-        ],
-      },
+      /* v4.0: 分身的 UI 文案 / 知识库 / 提示词已移到 data/persona.json，
+         由 tools/build_persona.py 生成 js/persona.js 与云函数。 */
       board: {
         namePlaceholder: "你的昵称",
         msgPlaceholder: "写下你想说的话...",
@@ -153,7 +140,7 @@ const SITE_DATA = {
     },
     en: {
       nav: { intro: "About", major: "Major", hobbies: "Interests", contact: "Contact", board: "Board" },
-      heroKicker: "PIXEL FOREST · v2.7",
+      heroKicker: "PIXEL FOREST · v4.0",
       heroSub: "tju-polyu · Computer Science",
       heroIntro: "A naive, curious, and humorous freshman from Gansu.",
       menuHint: "Press A/B/X/Y for sections · Screen → board · L/R theme",
@@ -205,7 +192,7 @@ const SITE_DATA = {
         { icon: "💬", label: "WeChat", value: "ssyishappy", href: "" },
         { icon: "🐧", label: "QQ", value: "663579961", href: "" },
       ],
-      footer: { text: "Shi Shengyuan · Live with passion and curiosity", note: "Course project · Pure static · Zero build deps" },
+      footer: { text: "Shi Shengyuan · Live with passion and curiosity", note: "Course project · Static site + serverless avatar · Zero build deps" },
       theme: { dark: "Switch to dark mode", light: "Switch to light mode" },
       chat: {
         title: "What would you like to say?",
@@ -221,21 +208,7 @@ const SITE_DATA = {
         play: "Play favorite music",
         pause: "Pause music",
       },
-      bot: {
-        title: "My Avatar",
-        open: "Ask my avatar",
-        hint: "I'm Shishengyuan's avatar. Tap a question below or just ask — I'll answer!",
-        placeholder: "Type your question...",
-        ask: "Ask",
-        fallback: "I haven't learned that one yet — try one of the questions below?",
-        qa: [
-          { q: "Who are you?", a: "I'm Shishengyuan's avatar, a little pixel person living in this page. I remember all his stories and thoughts.", k: ["who", "you", "name", "谁"] },
-          { q: "Where are you from?", a: "I come from Gansu, a land wrapped in loess and mountains. Now I've traveled east to study in Tianjin.", k: ["where", "from", "hometown", "哪里"] },
-          { q: "What do you study?", a: "I'm in the TJU–PolyU joint program, majoring in Computer Science.", k: ["study", "major", "computer", "专业"] },
-          { q: "What are your hobbies?", a: "Badminton, philosophy, music, and crosstalk. Both motion and thought — I keep them all.", k: ["hobby", "hobbies", "interest", "爱好"] },
-          { q: "What kind of person do you want to be?", a: "Curious, purposeful, and interesting — someone useful too. That's the road I keep walking.", k: ["become", "goal", "dream", "future", "成为"] },
-        ],
-      },
+      /* v4.0: avatar copy / knowledge / prompt live in data/persona.json. */
       board: {
         namePlaceholder: "Your nickname",
         msgPlaceholder: "Write something...",

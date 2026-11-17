@@ -121,7 +121,7 @@
   function siteVersion() {
     var cfg = window.SUPABASE_CONFIG;
     if (cfg && cfg.siteVersion) return String(cfg.siteVersion);
-    // 从页面标题里抓 "v2.7" 这样的版本号
+    // 从页面标题里抓 "v4.0" 这样的版本号
     var m = String(document.title || "").match(/v\d+(?:\.\d+)+/);
     return m ? m[0] : "unknown";
   }
@@ -640,7 +640,7 @@
       if (isOpen()) renderModal();
     },
     /* 供 admin.html 等外部读取（调试用） */
-    version: "v3.1",
+    version: "v4.0",
     pendingCount: outboxCount,
     /* 最近一次成功走的是「直连」还是「中转」（排查用；没提交过则为 null） */
     lastVia: function () { return lastVia; },
